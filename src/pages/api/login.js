@@ -1,6 +1,31 @@
 import { generateRandomToken } from "@/utils/RandomToken";
 import mongoose from "mongoose";
 
+const userSchema = new mongoose.Schema({
+    id: {
+        type: String,
+        require: true,
+    },
+    name: {
+        type: String,
+        require: true,
+    },
+    nis: {
+        type: String,
+        require: true,
+    },
+    password: {
+        type: String,
+        require: true,
+    },
+    token: {
+        type: String,
+        default: "",
+    },
+});
+
+const Users = mongoose.models.User || mongoose.model("User", userSchema);
+
 const connectMongoDB = async () => {
     try {
         await mongoose.connect(
@@ -10,24 +35,13 @@ const connectMongoDB = async () => {
                 useUnifiedTopology: true,
             }
         );
+        console.log("Connected to MongoDB");
     } catch (error) {
-        console.log(error);
+        console.error("Error connecting to MongoDB:", error);
     }
 };
 
 connectMongoDB();
-
-const Users = mongoose.model(
-    "user",
-    new mongoose.Schema({
-        // Definisikan skema sesuai kebutuhan
-        id: String,
-        name: String,
-        password: String,
-        nis: String,
-        token: String,
-    })
-);
 
 export default async function handler(req, res) {
     try {
@@ -36,12 +50,10 @@ export default async function handler(req, res) {
 
             // Validasi nis dan password
             if (!nis || !password) {
-                return res
-                    .status(400)
-                    .json({
-                        error: true,
-                        message: "NIS dan password wajib diisi",
-                    });
+                return res.status(400).json({
+                    error: true,
+                    message: "NIS dan password wajib diisi",
+                });
             }
 
             // Cari user berdasarkan nis dan password

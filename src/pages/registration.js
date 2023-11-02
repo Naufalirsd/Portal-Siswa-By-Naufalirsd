@@ -1,6 +1,8 @@
 import styles from "@/styles/Registration.module.css";
 import Link from "next/link";
 import { useState } from "react";
+import mongoose from "mongoose"; // Impor mongoose di sini
+import { v4 as uuid } from "uuid";
 
 export default function Registration() {
     const [nis, setNis] = useState("");
@@ -9,6 +11,22 @@ export default function Registration() {
     const [error, setError] = useState("");
 
     const handleRegistration = async () => {
+        // Validasi di sini sebelum mengirim permintaan ke server
+        if (name.length < 3 || name.length >= 20) {
+            setError("Nama harus di antara 3 sampai 20 karakter");
+            return;
+        }
+
+        if (nis.length !== 5) {
+            setError("NIS harus 5 karakter");
+            return;
+        }
+
+        if (password.length < 6 || password.length >= 10) {
+            setError("Password harus di antara 6 sampai 10 karakter");
+            return;
+        }
+
         // Kirim data registrasi ke server
         const response = await fetch("/api/registration", {
             method: "POST",
@@ -20,10 +38,10 @@ export default function Registration() {
 
         const data = await response.json();
 
-        if (response.status === 200) {
+        if (response.status === 201) {
             // Registrasi berhasil, tampilkan pesan sukses atau redirect ke halaman login
         } else {
-            // Registrasi gagal, tampilkan pesan kesalahan
+            // Registrasi gagal, tampilkan pesan kesalahan dari server
             setError(data.message);
         }
     };
