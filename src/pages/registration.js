@@ -1,10 +1,11 @@
 import styles from "@/styles/Registration.module.css";
 import Link from "next/link";
 import { useState } from "react";
-import mongoose from "mongoose"; // Impor mongoose di sini
-import { v4 as uuid } from "uuid";
+import { useRouter } from "next/router";
 
 export default function Registration() {
+    const router = useRouter();
+
     const [nis, setNis] = useState("");
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
@@ -40,6 +41,8 @@ export default function Registration() {
 
         if (response.status === 201) {
             // Registrasi berhasil, tampilkan pesan sukses atau redirect ke halaman login
+            alert("Registrasi berhasil!");
+            router.push("/login");
         } else {
             // Registrasi gagal, tampilkan pesan kesalahan dari server
             setError(data.message);

@@ -1,44 +1,6 @@
-import mongoose from "mongoose";
 import { v4 as uuid } from "uuid";
-
-const userSchema = new mongoose.Schema({
-    id: {
-        type: String,
-        require: true,
-    },
-    name: {
-        type: String,
-        require: true,
-    },
-    nis: {
-        type: String,
-        require: true,
-    },
-    password: {
-        type: String,
-        require: true,
-    },
-    token: {
-        type: String,
-        default: "",
-    },
-});
-
-const Users = mongoose.models.User || mongoose.model("User", userSchema);
-
-const connectMongoDB = async () => {
-    try {
-        await mongoose.connect(
-            "mongodb+srv://ppqita:santri@ppqitadb.9ybiiar.mongodb.net/portal-siswa",
-            {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            }
-        );
-    } catch (error) {
-        console.log(error);
-    }
-};
+import Users from "@/models/users";
+import { connectMongoDB } from "@/db/mongoDB";
 
 connectMongoDB();
 
@@ -52,7 +14,7 @@ export default async function handler(req, res) {
         }
 
         const { name, nis, password } = req.body;
-
+        // validasi dari client (ada atau tidak)
         if (!name) {
             return res
                 .status(400)
@@ -71,6 +33,7 @@ export default async function handler(req, res) {
                 .json({ error: true, message: "tidak ada Password" });
         }
 
+        // validasi sesuai kreteria atau tidak
         if (name.length < 3 || name.length >= 20) {
             return res.status(400).json({
                 error: true,
@@ -91,7 +54,7 @@ export default async function handler(req, res) {
                 message: "password harus diantar 6 sampai 10 karakter",
             });
         }
-
+        // cek apakah id atau nis sudah digunakan
         const user = await Users.findOne({ nis });
         console.log("user: ", user);
 
@@ -102,13 +65,16 @@ export default async function handler(req, res) {
             });
         }
 
+        // lengkapi data yg kurang
         const id = uuid();
 
         const data = { id, name, nis, password };
 
+        // jika sudah sesuai simpan
         const users = new Users(data);
         await users.save();
 
+        // kasih tahu client (hanya data yg diperbolehkan)
         return res.status(201).json({ id: users.id, nis: users.nis });
     } catch (error) {
         console.log("error:", error);

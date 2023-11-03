@@ -1,7 +1,18 @@
-import Link from "next/link"; // Menggunakan 'next/link' untuk routing
-import styles from "../styles/Dashboard.module.css";
+import { useRouter } from "next/router";
+import styles from "@/styles/Dashboard.module.css";
 
 export default function Dashboard() {
+    const router = useRouter();
+
+    const handleLogout = () => {
+        // Hapus token atau lakukan tindakan logout lainnya di sini
+        // Contoh penghapusan cookie:
+        document.cookie =
+            "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        router.push("/login"); // Redirect ke halaman login
+    };
+
     return (
         <div className={styles.dashboardContainer}>
             {/* Navigasi Atas */}
@@ -28,7 +39,7 @@ export default function Dashboard() {
                     </button>
                 </div>
                 <div className={styles.logoutButton}>
-                    <Link href="#">Logout</Link>
+                    <button onClick={handleLogout}>Logout</button>
                 </div>
             </div>
 

@@ -1,29 +1,36 @@
-import styles from "@/styles/Login.module.css";
-import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/router";
+import styles from "@/styles/Login.module.css";
 
 export default function Login() {
+    const router = useRouter();
+
     const [nis, setNis] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
     const handleLogin = async () => {
-        // Kirim data login ke server
-        const response = await fetch("/api/login", {
-            method: "POST",
-            body: JSON.stringify({ nis, password }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        try {
+            const data = { nis, password };
 
-        const data = await response.json();
+            const res = await fetch("/api/login", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const responseData = await res.json();
 
-        if (response.status === 200) {
-            // Login berhasil, tangani token di sini
-        } else {
-            // Login gagal, tampilkan pesan kesalahan
-            setError(data.message);
+            if (res.ok) {
+                // Redirect ke halaman dashboard jika login berhasil
+                router.push("/dashboard");
+            } else {
+                setError(responseData.message);
+            }
+        } catch (error) {
+            console.log("error: ", error);
+            alert("Terjadi Kesalahan, harap hubungi tim support");
         }
     };
 
@@ -38,13 +45,11 @@ export default function Login() {
                     {/* Input NIS */}
                     <div className={styles["form-group"]}>
                         <label className={styles["form-label"]} htmlFor="nis">
-                            NIS*
+                            NIS<span className={styles["star"]}>*</span>
                         </label>
                         <input
-                            type="text"
-                            id="nis"
                             className={`${styles["form-input"]} ${styles["transparent-border"]}`}
-                            placeholder="NIS"
+                            placeholder="12345"
                             value={nis}
                             onChange={(e) => setNis(e.target.value)}
                         />
@@ -54,20 +59,18 @@ export default function Login() {
                         <label
                             className={styles["form-label"]}
                             htmlFor="password">
-                            Password*
+                            Password<span className={styles["star"]}>*</span>
                         </label>
                         <input
-                            type="password"
-                            id="password"
                             className={`${styles["form-input"]} ${styles["transparent-border"]}`}
-                            placeholder="Password"
+                            placeholder="******"
+                            type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
                     {/* Tombol Login */}
                     <button
-                        type="button"
                         className={styles["signin-button"]}
                         onClick={handleLogin}>
                         Sign In
@@ -81,7 +84,9 @@ export default function Login() {
                 <div className={styles["signup-link"]}>
                     <p>
                         Not registered yet?{" "}
-                        <Link href="/registration">Create an Account</Link>
+                        <a href="/registration" className={styles["create"]}>
+                            Create an Account
+                        </a>
                     </p>
                 </div>
             </div>
