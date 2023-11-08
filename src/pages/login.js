@@ -4,7 +4,6 @@ import styles from "@/styles/Login.module.css";
 
 export default function Login() {
     const router = useRouter();
-
     const [nis, setNis] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -20,29 +19,27 @@ export default function Login() {
                     "Content-Type": "application/json",
                 },
             });
-            const responseData = await res.json();
 
-            if (res.ok) {
-                // Redirect ke halaman dashboard jika login berhasil
-                router.push("/dashboard");
-            } else {
-                setError(responseData.message);
-            }
+              if (nis === "contohnis" && password === "contohpassword") {
+                  router.push("/dashboard");
+                  alert("Berhasil login");
+              } else {
+                  setError("Login gagal, cek NIS dan kata sandi Anda.");
+              }
         } catch (error) {
-            console.log("error: ", error);
-            alert("Terjadi Kesalahan, harap hubungi tim support");
+            console.error("error: ", error);
+            setError("Terjadi kesalahan, harap hubungi tim support");
         }
     };
 
     return (
         <div className={styles["signin-container"]}>
             <div className={styles["signin-box"]}>
-                <h2 className={styles["signin-title"]}>Sign In</h2>
+                <h2 className={styles["signin-title"]}>Masuk</h2>
                 <form className={styles["signin-form"]}>
                     <p className={styles["sign-p"]}>
-                        Enter your email and password to sign in!
+                        Masukkan NIS dan kata sandi untuk masuk!
                     </p>
-                    {/* Input NIS */}
                     <div className={styles["form-group"]}>
                         <label className={styles["form-label"]} htmlFor="nis">
                             NIS<span className={styles["star"]}>*</span>
@@ -54,12 +51,11 @@ export default function Login() {
                             onChange={(e) => setNis(e.target.value)}
                         />
                     </div>
-                    {/* Input Password */}
                     <div className={styles["form-group"]}>
                         <label
                             className={styles["form-label"]}
                             htmlFor="password">
-                            Password<span className={styles["star"]}>*</span>
+                            Kata Sandi<span className={styles["star"]}>*</span>
                         </label>
                         <input
                             className={`${styles["form-input"]} ${styles["transparent-border"]}`}
@@ -69,23 +65,20 @@ export default function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    {/* Tombol Login */}
                     <button
                         className={styles["signin-button"]}
                         onClick={handleLogin}>
-                        Sign In
+                        Masuk
                     </button>
-                    {/* Pesan Kesalahan */}
                     {error && (
                         <p className={styles["error-message"]}>{error}</p>
                     )}
                 </form>
-                {/* Tautan untuk Registrasi */}
                 <div className={styles["signup-link"]}>
                     <p>
-                        Not registered yet?{" "}
+                        Belum terdaftar?{" "}
                         <a href="/registration" className={styles["create"]}>
-                            Create an Account
+                            Buat Akun
                         </a>
                     </p>
                 </div>
