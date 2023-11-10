@@ -10,8 +10,6 @@ export default function Login() {
 
     const handleLogin = async () => {
         try {
-            const data = { nis, password };
-
             const res = await fetch("/api/login", {
                 method: "POST",
                 body: JSON.stringify(data),
@@ -20,17 +18,22 @@ export default function Login() {
                 },
             });
 
-              if (nis === "contohnis" && password === "contohpassword") {
-                  router.push("/dashboard");
-                  alert("Berhasil login");
-              } else {
-                  setError("Login gagal, cek NIS dan kata sandi Anda.");
-              }
+            const responseData = await res.json(); // Mendapatkan data JSON dari respons
+
+            if (res.ok) {
+                // Periksa apakah respons memiliki status code 200 (OK)
+                console.log(responseData);
+                alert("Berhasil login");
+            } else {
+                console.error("Gagal melakukan permintaan:", res.status);
+                console.log(responseData);
+                alert(responseData.message);
+            }
         } catch (error) {
-            console.error("error: ", error);
-            setError("Terjadi kesalahan, harap hubungi tim support");
+            console.log("error: ", error);
+            alert("Terjadi Kesalahan, harap hubungi tim support");
         }
-    };
+    }
 
     return (
         <div className={styles["signin-container"]}>
@@ -42,7 +45,7 @@ export default function Login() {
                     </p>
                     <div className={styles["form-group"]}>
                         <label className={styles["form-label"]} htmlFor="nis">
-                            NIS<span className={styles["star"]}>*</span>
+                            Name<span className={styles["star"]}>*</span>
                         </label>
                         <input
                             className={`${styles["form-input"]} ${styles["transparent-border"]}`}

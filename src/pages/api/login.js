@@ -33,7 +33,7 @@ export default async function handler(req, res) {
                 });
         }
 
-        const user = await Users.findOne({ nis, password });
+        const user = await Users.findOne({ name: nis, password });
 
         if (!user || !user.nis) {
             return res

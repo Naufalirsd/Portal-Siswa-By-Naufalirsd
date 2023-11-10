@@ -6,46 +6,47 @@ import { useRouter } from "next/router";
 export default function Registration() {
     const router = useRouter();
 
-    const [nis, setNis] = useState("");
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
     const handleRegistration = async () => {
-        // Validasi di sini sebelum mengirim permintaan ke server
-        if (name.length < 3 || name.length >= 20) {
-            setError("Nama harus di antara 3 sampai 20 karakter");
-            return;
-        }
+        try {
+            // Validasi di sini sebelum mengirim permintaan ke server
+            if (name.length < 3 || name.length >= 20) {
+                setError("Nama harus di antara 3 sampai 20 karakter");
+                return;
+            }
 
-        if (nis.length !== 5) {
-            setError("NIS harus 5 karakter");
-            return;
-        }
+            if (password.length < 6 || password.length >= 10) {
+                setError("Password harus di antara 6 sampai 10 karakter");
+                return;
+            }
 
-        if (password.length < 6 || password.length >= 10) {
-            setError("Password harus di antara 6 sampai 10 karakter");
-            return;
-        }
+            // Kirim data registrasi ke server
+            const response = await fetch("/api/registration", {
+                method: "POST",
+                body: JSON.stringify({ name, password }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-        // Kirim data registrasi ke server
-        const response = await fetch("/api/registration", {
-            method: "POST",
-            body: JSON.stringify({ nis, name, password }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+            const data = await response.json();
 
-        const data = await response.json();
-
-        if (response.status === 201) {
-            // Registrasi berhasil, tampilkan pesan sukses atau redirect ke halaman login
-            alert("Registrasi berhasil!");
-            router.push("/login");
-        } else {
-            // Registrasi gagal, tampilkan pesan kesalahan dari server
-            setError(data.message);
+            if (response.status === 201) {
+                // Registrasi berhasil, tampilkan pesan sukses atau redirect ke halaman login
+                alert("Registrasi berhasil!");
+                router.push("/login");
+            } else {
+                // Registrasi gagal, tampilkan pesan kesalahan dari server
+                setError(data.message);
+            }
+        } catch (error) {
+            console.error("Error during registration:", error);
+            alert(
+                "Terjadi kesalahan selama registrasi. Harap hubungi tim dukungan."
+            );
         }
     };
 
@@ -59,20 +60,6 @@ export default function Registration() {
                     <p className={styles["sign-p"]}>
                         Enter your details to create an account!
                     </p>
-                    {/* Input NIS */}
-                    <div className={styles["form-group"]}>
-                        <label className={styles["form-label"]} htmlFor="nis">
-                            NIS*
-                        </label>
-                        <input
-                            type="text"
-                            id="nis"
-                            className={`${styles["form-input"]} ${styles["transparent-border"]}`}
-                            placeholder="NIS"
-                            value={nis}
-                            onChange={(e) => setNis(e.target.value)}
-                        />
-                    </div>
                     {/* Input Name */}
                     <div className={styles["form-group"]}>
                         <label className={styles["form-label"]} htmlFor="name">
