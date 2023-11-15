@@ -1,77 +1,58 @@
-import styles from "@/styles/Registration.module.css";
-import Link from "next/link";
+// registration.js
+
 import { useState } from "react";
 import { useRouter } from "next/router";
+import styles from "@/styles/Registration.module.css";
 
 export default function Registration() {
     const router = useRouter();
 
-    const [name, setName] = useState("");
+    const [nis, setNis] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
     const handleRegistration = async () => {
         try {
-            // Validasi di sini sebelum mengirim permintaan ke server
-            if (name.length < 3 || name.length >= 20) {
-                setError("Nama harus di antara 3 sampai 20 karakter");
-                return;
-            }
+            const data = { nis, password };
 
-            if (password.length < 6 || password.length >= 10) {
-                setError("Password harus di antara 6 sampai 10 karakter");
-                return;
-            }
-
-            // Kirim data registrasi ke server
-            const response = await fetch("/api/registration", {
+            const res = await fetch("/api/registration", {
                 method: "POST",
-                body: JSON.stringify({ name, password }),
+                body: JSON.stringify(data),
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
+            const responseData = await res.json();
 
-            const data = await response.json();
-
-            if (response.status === 201) {
-                // Registrasi berhasil, tampilkan pesan sukses atau redirect ke halaman login
-                alert("Registrasi berhasil!");
+            if (res.ok) {
                 router.push("/login");
             } else {
-                // Registrasi gagal, tampilkan pesan kesalahan dari server
-                setError(data.message);
+                setError(responseData.message);
             }
         } catch (error) {
-            console.error("Error during registration:", error);
-            alert(
-                "Terjadi kesalahan selama registrasi. Harap hubungi tim dukungan."
-            );
+            console.log("error: ", error);
+            alert("Terjadi Kesalahan, harap hubungi tim support");
         }
     };
 
     return (
         <div className={styles["registration-container"]}>
             <div className={styles["registration-box"]}>
-                <h2 className={styles["registration-title"]}>
-                    Create an Account
-                </h2>
+                <h2 className={styles["registration-title"]}>Registrasi</h2>
                 <form className={styles["registration-form"]}>
-                    <p className={styles["sign-p"]}>
-                        Enter your details to create an account!
+                    <p className={styles["register-p"]}>
+                        Masukkan detail Anda untuk membuat akun!
                     </p>
-                    {/* Input Name */}
+                    {/* Input NIS */}
                     <div className={styles["form-group"]}>
-                        <label className={styles["form-label"]} htmlFor="name">
-                            Name*
+                        <label className={styles["form-label"]} htmlFor="nis">
+                            NIS<span className={styles["star"]}>*</span>
                         </label>
                         <input
-                            type="text"
-                            id="name"
                             className={`${styles["form-input"]} ${styles["transparent-border"]}`}
-                            placeholder="Full Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            placeholder="12345"
+                            value={nis}
+                            onChange={(e) => setNis(e.target.value)}
                         />
                     </div>
                     {/* Input Password */}
@@ -79,23 +60,21 @@ export default function Registration() {
                         <label
                             className={styles["form-label"]}
                             htmlFor="password">
-                            Password*
+                            Password<span className={styles["star"]}>*</span>
                         </label>
                         <input
-                            type="password"
-                            id="password"
                             className={`${styles["form-input"]} ${styles["transparent-border"]}`}
-                            placeholder="Password"
+                            placeholder="******"
+                            type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
                     {/* Tombol Registrasi */}
                     <button
-                        type="button"
                         className={styles["registration-button"]}
                         onClick={handleRegistration}>
-                        Register
+                        Daftar
                     </button>
                     {/* Pesan Kesalahan */}
                     {error && (
@@ -103,10 +82,12 @@ export default function Registration() {
                     )}
                 </form>
                 {/* Tautan untuk Login */}
-                <div className={styles["signin-link"]}>
+                <div className={styles["login-link"]}>
                     <p>
-                        Already have an account?{" "}
-                        <Link href="/login">Sign In</Link>
+                        Sudah punya akun?{" "}
+                        <a href="/login" className={styles["signin"]}>
+                            Masuk
+                        </a>
                     </p>
                 </div>
             </div>
