@@ -1,5 +1,4 @@
-// api/registration.js
-
+import { v4 as uuid } from "uuid";
 import Users from "@/models/users";
 import { connectMongoDB } from "@/db/mongoDB";
 
@@ -7,56 +6,81 @@ connectMongoDB();
 
 export default async function handler(req, res) {
     try {
+        // pengecekan method
         if (req.method !== "POST") {
             return res
                 .status(405)
-                .json({ error: true, message: "Metode tidak diizinkan" });
+                .json({ error: true, message: "mehtod tidak diijinkan" });
         }
 
-        const { nis, password } = req.body;
-
-        if (!nis || !password) {
+        const { name, nis, password } = req.body;
+        // validasi dari client (ada atau tidak)
+        if (!name) {
             return res
                 .status(400)
-                .json({ error: true, message: "NIS dan password diperlukan" });
+                .json({ error: true, message: "tidak ada Nama" });
+        }
+
+        if (!nis) {
+            return res
+                .status(400)
+                .json({ error: true, message: "tidak ada NIS" });
+        }
+
+        if (!password) {
+            return res
+                .status(400)
+                .json({ error: true, message: "tidak ada Password" });
+        }
+
+        // validasi sesuai kreteria atau tidak
+        if (name.length < 3 || name.length >= 20) {
+            return res.status(400).json({
+                error: true,
+                message: "name harus diantar 3 sampai 20 karakter",
+            });
         }
 
         if (nis.length !== 5) {
             return res.status(400).json({
                 error: true,
-                message: "NIS harus 5 karakter",
+                message: "nis harus 5 karakter",
             });
         }
 
         if (password.length < 6 || password.length >= 10) {
             return res.status(400).json({
                 error: true,
-                message: "Password harus antara 6 dan 10 karakter",
+                message: "password harus diantar 6 sampai 10 karakter",
             });
         }
+        // cek apakah id atau nis sudah digunakan
+        const user = await Users.findOne({ nis });
+        console.log("user: ", user);
 
-        const existingUser = await Users.findOne({ nis });
-
-        if (existingUser) {
+        if (user && user.nis) {
             return res.status(400).json({
                 error: true,
-                message: "Pengguna dengan NIS ini sudah ada",
+                message: "nis sudah pernah didaftarkan",
             });
         }
 
-        const newUser = new Users({
-            nis,
-            password,
-        });
+        // lengkapi data yg kurang
+        const id = uuid();
 
-        await newUser.save();
+        const data = { id, name, nis, password };
 
-        res.status(200).json({ message: "Registrasi berhasil" });
+        // jika sudah sesuai simpan
+        const users = new Users(data);
+        await users.save();
+
+        // kasih tahu client (hanya data yg diperbolehkan)
+        return res.status(201).json({ id: users.id, nis: users.nis });
     } catch (error) {
         console.log("error:", error);
         res.status(500).json({
             error: true,
-            message: "Terjadi kesalahan, harap hubungi pengembang",
+            message: "ada masalah harap hubungi developer",
         });
     }
 }

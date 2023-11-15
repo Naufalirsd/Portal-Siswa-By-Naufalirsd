@@ -9,15 +9,22 @@ export default function Registration() {
 
     const [nis, setNis] = useState("");
     const [password, setPassword] = useState("");
+    const [name, setName] = useState(""); // Tambahkan state untuk name
     const [error, setError] = useState("");
 
     const handleRegistration = async () => {
         try {
-            const data = { nis, password };
+            // Validasi panjang password
+            if (password.length < 6 || password.length >= 10) {
+                setError("Password harus diantar 6 sampai 10 karakter");
+                return;
+            }
+
+            const { nis, password, name } = req.body;
 
             const res = await fetch("/api/registration", {
                 method: "POST",
-                body: JSON.stringify(data),
+                body: JSON.stringify({ nis, password, name }),
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -43,6 +50,18 @@ export default function Registration() {
                     <p className={styles["register-p"]}>
                         Masukkan detail Anda untuk membuat akun!
                     </p>
+                    {/* Input Name */}
+                    <div className={styles["form-group"]}>
+                        <label className={styles["form-label"]} htmlFor="name">
+                            Name<span className={styles["star"]}>*</span>
+                        </label>
+                        <input
+                            className={`${styles["form-input"]} ${styles["transparent-border"]}`}
+                            placeholder="John Doe"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
                     {/* Input NIS */}
                     <div className={styles["form-group"]}>
                         <label className={styles["form-label"]} htmlFor="nis">
