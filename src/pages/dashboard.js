@@ -1,9 +1,13 @@
+import styles from "@/styles/reglog.module.css";
+import { getCookie } from "cookies-next";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Link from "next/link";
-import styles from "@/styles/Dashboard.module.css";
+import { getDataApi, postDataApi } from "@/utils/api";
 
 export default function Dashboard() {
     const router = useRouter();
+    const [user, setUser] = useState({ id: "", name: "" });
+    const [allUsers, setAllUsers] = useState([]);
 
     const handleLogout = async () => {
         try {
@@ -15,31 +19,128 @@ export default function Dashboard() {
         }
     };
 
+    useEffect(() => {
+        const run = async () => {
+            try {
+                let myToken = "";
+                if (localStorage.getItem("keepLogin") === "true") {
+                    myToken = getCookie("token");
+                } else {
+                    myToken = sessionStorage.getItem("token");
+                }
+
+                if (myToken) {
+                    const data = { token: myToken };
+
+                    let myUser;
+                    await postDataApi(
+                        "/api/check-token",
+                        data,
+                        (successData) => {
+                            let roleName = "";
+                            switch (successData.role) {
+                                case 0:
+                                    roleName = "Santri";
+                                    break;
+                                case 1:
+                                    roleName = "Admin";
+                                    break;
+                            }
+                            myUser = { ...successData, roleName };
+                            setUser(myUser);
+                        },
+                        (failData) => {
+                            console.log("failData: ", failData);
+                            router.push("/login");
+                        }
+                    );
+
+                    if (myUser && myUser.role === 1) {
+                        await getDataApi(
+                            "/api/list-user",
+                            (dataSuccess) => {
+                                console.log("dataSuccess: ", dataSuccess);
+                                setAllUsers(dataSuccess.users);
+                            },
+                            (dataFail) => {
+                                console.log("dataFail: ", dataFail);
+                            }
+                        );
+                    }
+                }
+            } catch (error) {
+                console.log("error: ", error);
+            }
+        };
+
+        run();
+    }, [router]);
+
     return (
-        <div className={styles.dashboardContainer}>
-            <div className={styles.navHeader}>
-                <div className={styles.title}>
-                    <h3>Naufalirsd.</h3>
+        <div className={styles.font}>
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "40px",
+                    minHeight: "80vh",
+                }}>
+                <div>
+                    <h4>Nama:</h4>
+                    <p>{user.name}</p>
                 </div>
-                <div className={styles.searchContainer}>
-                    <input type="text" placeholder="Cari..." />
-                    <button type="button">
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M11.4235 11.6451C12.3267 10.7419 12.3267 9.25809 11.4235 8.35488L8.99918 5.93051M5.00082 5.93051C4.09761 6.83373 4.09761 8.31754 5.00082 9.22075L7.42518 11.6451M5.93051 8.99918L11.6451 3.28459"
-                                stroke="#4318FF"
-                                strokeWidth="2"
-                            />
-                        </svg>
+
+                <div>
+                    <h3>Logout:</h3>
+                    <button
+                        className={styles.bodra}
+                        style={{
+                            padding: "10px 20px",
+                        }}
+                        onClick={handleLogout}>
+                        Logout
                     </button>
                 </div>
-                <div className={styles.logoutButton}>
-                    <button onClick={handleLogout}>Logout</button>
+
+                <div>
+                    <span style={{ fontWeight: "700", fontSize: "28px" }}>
+                        {user.name}({user.roleName})
+                    </span>
+                </div>
+                <div style={{ padding: "32px" }}>
+                    <div>Data User</div>
+                    <div style={{ width: "100%" }}>
+                        <table
+                            style={{
+                                width: "100%",
+                                backgroundColor: "#fff",
+                                border: "1px",
+                            }}>
+                            <thead>
+                                <tr>
+                                    <th>NIS</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {allUsers &&
+                                    allUsers.map((data, index) => {
+                                        return (
+                                            <tr
+                                                key={index}
+                                                style={{ padding: "8px" }}>
+                                                <td>{data.nis}</td>
+                                                <td>{data.name}</td>
+                                                <td>{data.status}</td>
+                                            </tr>
+                                        );
+                                    })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

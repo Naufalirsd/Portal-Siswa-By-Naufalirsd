@@ -1,7 +1,6 @@
-// login.js
-
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import styles from "@/styles/Login.module.css";
 
 export default function Login() {
@@ -11,8 +10,16 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const handleLogin = async () => {
+    const handleLogin = async (e) => {
         try {
+            e.preventDefault(); // Mencegah reload halaman saat mengirim data
+
+            // Validasi input tidak boleh kosong
+            if (!nis || !password) {
+                setError("NIS dan password harus diisi");
+                return;
+            }
+
             const data = { nis, password };
 
             const res = await fetch("/api/login", {
@@ -43,7 +50,6 @@ export default function Login() {
                     <p className={styles["sign-p"]}>
                         Masukkan email dan kata sandi Anda untuk masuk!
                     </p>
-                    {/* Input NIS */}
                     <div className={styles["form-group"]}>
                         <label className={styles["form-label"]} htmlFor="nis">
                             NIS<span className={styles["star"]}>*</span>
@@ -55,7 +61,6 @@ export default function Login() {
                             onChange={(e) => setNis(e.target.value)}
                         />
                     </div>
-                    {/* Input Password */}
                     <div className={styles["form-group"]}>
                         <label
                             className={styles["form-label"]}
@@ -70,24 +75,22 @@ export default function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    {/* Tombol Masuk */}
                     <button
                         className={styles["signin-button"]}
                         onClick={handleLogin}>
                         Masuk
                     </button>
-                    {/* Pesan Kesalahan */}
                     {error && (
                         <p className={styles["error-message"]}>{error}</p>
                     )}
                 </form>
-                {/* Tautan untuk Registrasi */}
                 <div className={styles["signup-link"]}>
                     <p>
                         Belum punya akun?{" "}
-                        <a href="/registration" className={styles["create"]}>
+                        {/* Menggunakan Link untuk tautan registrasi */}
+                        <Link href="/registration" className={styles["create"]}>
                             Buat Akun
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </div>

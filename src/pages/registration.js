@@ -1,26 +1,34 @@
-// registration.js
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link"; // Import Link from Next.js
 import styles from "@/styles/Registration.module.css";
 
 export default function Registration() {
     const router = useRouter();
 
+    // Logika untuk redirect ke halaman login atau dashboard
+    useEffect(() => {
+        // Contoh: Jika pengguna sudah login, arahkan ke dashboard
+        // const isLoggedIn = true; // Gantilah dengan logika sesuai kebutuhan
+        // if (isLoggedIn) {
+        //     router.push("/dashboard");
+        // }
+    }, []);
+
     const [nis, setNis] = useState("");
     const [password, setPassword] = useState("");
-    const [name, setName] = useState(""); // Tambahkan state untuk name
+    const [name, setName] = useState("");
     const [error, setError] = useState("");
 
-    const handleRegistration = async () => {
+    const handleRegistration = async (e) => {
         try {
+            e.preventDefault(); // Mencegah reload halaman saat mengirim data
+
             // Validasi panjang password
-            if (password.length < 6 || password.length >= 10) {
+            if (password.length < 6 || password.length > 10) {
                 setError("Password harus diantar 6 sampai 10 karakter");
                 return;
             }
-
-            const { nis, password, name } = req.body;
 
             const res = await fetch("/api/registration", {
                 method: "POST",
@@ -50,7 +58,6 @@ export default function Registration() {
                     <p className={styles["register-p"]}>
                         Masukkan detail Anda untuk membuat akun!
                     </p>
-                    {/* Input Name */}
                     <div className={styles["form-group"]}>
                         <label className={styles["form-label"]} htmlFor="name">
                             Name<span className={styles["star"]}>*</span>
@@ -62,7 +69,6 @@ export default function Registration() {
                             onChange={(e) => setName(e.target.value)}
                         />
                     </div>
-                    {/* Input NIS */}
                     <div className={styles["form-group"]}>
                         <label className={styles["form-label"]} htmlFor="nis">
                             NIS<span className={styles["star"]}>*</span>
@@ -74,7 +80,6 @@ export default function Registration() {
                             onChange={(e) => setNis(e.target.value)}
                         />
                     </div>
-                    {/* Input Password */}
                     <div className={styles["form-group"]}>
                         <label
                             className={styles["form-label"]}
@@ -89,24 +94,21 @@ export default function Registration() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
-                    {/* Tombol Registrasi */}
                     <button
                         className={styles["registration-button"]}
                         onClick={handleRegistration}>
                         Daftar
                     </button>
-                    {/* Pesan Kesalahan */}
                     {error && (
                         <p className={styles["error-message"]}>{error}</p>
                     )}
                 </form>
-                {/* Tautan untuk Login */}
                 <div className={styles["login-link"]}>
                     <p>
                         Sudah punya akun?{" "}
-                        <a href="/login" className={styles["signin"]}>
+                        <Link href="/login" className={styles["signin"]}>
                             Masuk
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </div>

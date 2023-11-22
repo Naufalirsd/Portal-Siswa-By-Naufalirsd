@@ -15,22 +15,25 @@ export default async function handler(req, res) {
 
         const { name, nis, password } = req.body;
         // validasi dari client (ada atau tidak)
-        if (!name) {
-            return res
-                .status(400)
-                .json({ error: true, message: "tidak ada Nama" });
+        if (name.length < 3 || name.length >= 20) {
+            return res.status(400).json({
+                error: true,
+                message: "name harus diantar 3 sampai 20 karakter",
+            });
         }
 
-        if (!nis) {
-            return res
-                .status(400)
-                .json({ error: true, message: "tidak ada NIS" });
+        if (nis.length !== 5 || isNaN(nis)) {
+            return res.status(400).json({
+                error: true,
+                message: "nis harus 5 karakter angka",
+            });
         }
 
-        if (!password) {
-            return res
-                .status(400)
-                .json({ error: true, message: "tidak ada Password" });
+        if (password.length < 6 || password.length > 10) {
+            return res.status(400).json({
+                error: true,
+                message: "password harus diantar 6 sampai 10 karakter",
+            });
         }
 
         // validasi sesuai kreteria atau tidak
