@@ -103,12 +103,17 @@
 }
 
 .checkbox-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px; /* Sesuaikan dengan kebutuhan Anda */
-    margin-bottom: 20px;
-    font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content:start ;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.checkbox-input {
+  margin-right: 5px;
+  color: #4318FF;
 }
 
 .forget {

@@ -1,5 +1,3 @@
-// api/login.js
-
 import { generateRandomToken } from "@/utils/RandomToken";
 import Users from "@/models/users";
 import { getCookies, setCookie } from "cookies-next";
@@ -15,7 +13,7 @@ export default async function handler(req, res) {
                 .json({ error: true, message: "Metode tidak diizinkan" });
         }
 
-        const { nis, password } = req.body;
+        const { nis, password, isKeepLogin } = req.body;
 
         if (!nis || !password) {
             return res

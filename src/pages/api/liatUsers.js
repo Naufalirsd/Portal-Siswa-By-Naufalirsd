@@ -1,8 +1,8 @@
 import Users from "@/models/users";
-import { connectionDB } from "@/db/mongoDB";
+import { connectMongoDB } from "@/db/mongoDB";
 import { getCookies, getCookie, setCookie, deleteCookie } from "cookies-next";
 
-connectionDB();
+connectMongoDB();
 
 export default async function handler(req, res) {
     try {

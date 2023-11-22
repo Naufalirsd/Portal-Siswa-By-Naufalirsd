@@ -1,26 +1,27 @@
+import styles from "@/styles/Login.module.css";
+import { dmSans } from "@/styles/fonts";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import styles from "@/styles/Login.module.css";
 
 export default function Login() {
     const router = useRouter();
 
     const [nis, setNis] = useState("");
     const [password, setPassword] = useState("");
+    const [isKeepLogin, setKeepLogin] = useState(false);
     const [error, setError] = useState("");
 
     const handleLogin = async (e) => {
         try {
-            e.preventDefault(); // Mencegah reload halaman saat mengirim data
+            e.preventDefault();
 
-            // Validasi input tidak boleh kosong
             if (!nis || !password) {
                 setError("NIS dan password harus diisi");
                 return;
             }
 
-            const data = { nis, password };
+            const data = { nis, password, isKeepLogin };
 
             const res = await fetch("/api/login", {
                 method: "POST",
@@ -32,6 +33,11 @@ export default function Login() {
             const responseData = await res.json();
 
             if (res.ok) {
+                if (!isKeepLogin) {
+                    sessionStorage.setItem("token", responseData.token);
+                }
+
+                alert("Sukses login");
                 router.push("/dashboard");
             } else {
                 setError(responseData.message);
@@ -43,7 +49,7 @@ export default function Login() {
     };
 
     return (
-        <div className={styles["signin-container"]}>
+        <div className={`${styles["signin-container"]} ${dmSans.className}`}>
             <div className={styles["signin-box"]}>
                 <h2 className={styles["signin-title"]}>Masuk</h2>
                 <form className={styles["signin-form"]}>
@@ -75,6 +81,20 @@ export default function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
+                    <div className={styles["checkbox-container"]}>
+                        <input
+                            type="checkbox"
+                            checked={isKeepLogin}
+                            onChange={(e) => {
+                                setKeepLogin(e.target.checked);
+                            }}
+                            className={styles["checkbox-input"]}
+                        />
+                        <span style={{ marginBottom: "5px" }}>
+                            {" "}
+                            Keep Me Logged In
+                        </span>
+                    </div>
                     <button
                         className={styles["signin-button"]}
                         onClick={handleLogin}>
@@ -87,7 +107,6 @@ export default function Login() {
                 <div className={styles["signup-link"]}>
                     <p>
                         Belum punya akun?{" "}
-                        {/* Menggunakan Link untuk tautan registrasi */}
                         <Link href="/registration" className={styles["create"]}>
                             Buat Akun
                         </Link>

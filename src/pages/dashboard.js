@@ -1,23 +1,14 @@
-import styles from "@/styles/reglog.module.css";
+import styles from "@/styles/Dashboard.module.css";
+import { dmSans } from "@/styles/fonts";
 import { getCookie } from "cookies-next";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getDataApi, postDataApi } from "@/utils/api";
 
-export default function Dashboard() {
-    const router = useRouter();
+export default function Dasboard() {
     const [user, setUser] = useState({ id: "", name: "" });
+    const router = useRouter();
     const [allUsers, setAllUsers] = useState([]);
-
-    const handleLogout = async () => {
-        try {
-            document.cookie =
-                "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-            router.push("/login");
-        } catch (error) {
-            console.error("error: ", error);
-        }
-    };
 
     useEffect(() => {
         const run = async () => {
@@ -34,7 +25,7 @@ export default function Dashboard() {
 
                     let myUser;
                     await postDataApi(
-                        "/api/check-token",
+                        "/api/checkToken",
                         data,
                         (successData) => {
                             let roleName = "";
@@ -57,7 +48,7 @@ export default function Dashboard() {
 
                     if (myUser && myUser.role === 1) {
                         await getDataApi(
-                            "/api/list-user",
+                            "/api/listUsers",
                             (dataSuccess) => {
                                 console.log("dataSuccess: ", dataSuccess);
                                 setAllUsers(dataSuccess.users);
@@ -70,6 +61,7 @@ export default function Dashboard() {
                 }
             } catch (error) {
                 console.log("error: ", error);
+                // alert('Terjadi Kesalahan, harap hubungi team support');
             }
         };
 
@@ -77,70 +69,119 @@ export default function Dashboard() {
     }, [router]);
 
     return (
-        <div className={styles.font}>
+        <div className={`${styles.container} ${dmSans.className}`}>
+            <div className={styles.sidebar}>
+                <div
+                    style={{
+                        paddingTop: "56px",
+                        paddingBottom: "56px",
+                        paddingLeft: "54px",
+                        paddingRight: "54px",
+                        height: "70vh",
+                    }}>
+                    <h1>Dasboard</h1>
+                </div>
+                <div>
+                    <ul>
+                        <li style={{ listStyleType: "none" }}>
+                            <button
+                                style={{ fontWeight: "18px" }}
+                                onClick={async () => {
+                                    let myToken = "";
+                                    if (
+                                        localStorage.getItem("keepLogin") ===
+                                        "true"
+                                    ) {
+                                        myToken = getCookie("token");
+                                    } else {
+                                        sessionStorage.setItem("token", "");
+                                        router.push("/login");
+                                        return;
+                                    }
+                                    if (myToken) {
+                                        const data = { token: myToken };
+                                        await postDataApi(
+                                            "/api/logout",
+                                            data,
+                                            (successData) => {
+                                                router.push("/login");
+                                            },
+                                            (failData) => {
+                                                console.error(
+                                                    "Gagal melakukan permintaan:",
+                                                    failData
+                                                );
+                                                alert(
+                                                    "terjadi kesalahan koneksi " +
+                                                        failData
+                                                );
+                                            }
+                                        );
+                                    } else {
+                                        router.push("/login");
+                                    }
+                                }}>
+                                Logout
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <div
                 style={{
                     display: "flex",
+                    width: "100%",
                     flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "40px",
-                    minHeight: "80vh",
                 }}>
-                <div>
-                    <h4>Nama:</h4>
-                    <p>{user.name}</p>
-                </div>
-
-                <div>
-                    <h3>Logout:</h3>
-                    <button
-                        className={styles.bodra}
-                        style={{
-                            padding: "10px 20px",
-                        }}
-                        onClick={handleLogout}>
-                        Logout
-                    </button>
-                </div>
-
-                <div>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "end",
+                        width: "100%",
+                        padding: "16px",
+                    }}>
                     <span style={{ fontWeight: "700", fontSize: "28px" }}>
                         {user.name}({user.roleName})
                     </span>
                 </div>
                 <div style={{ padding: "32px" }}>
-                    <div>Data User</div>
-                    <div style={{ width: "100%" }}>
-                        <table
-                            style={{
-                                width: "100%",
-                                backgroundColor: "#fff",
-                                border: "1px",
-                            }}>
-                            <thead>
-                                <tr>
-                                    <th>NIS</th>
-                                    <th>Name</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {allUsers &&
-                                    allUsers.map((data, index) => {
-                                        return (
-                                            <tr
-                                                key={index}
-                                                style={{ padding: "8px" }}>
-                                                <td>{data.nis}</td>
-                                                <td>{data.name}</td>
-                                                <td>{data.status}</td>
-                                            </tr>
-                                        );
-                                    })}
-                            </tbody>
-                        </table>
-                    </div>
+                    {user.role === 1 && (
+                        <>
+                            <div>Data User</div>
+                            <div style={{ width: "100%" }}>
+                                <table
+                                    style={{
+                                        width: "100%",
+                                        backgroundColor: "#fff",
+                                        border: "1px",
+                                    }}>
+                                    <thead>
+                                        <tr>
+                                            <th>NIS</th>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {allUsers &&
+                                            allUsers.map((data, index) => {
+                                                return (
+                                                    <tr
+                                                        key={index}
+                                                        style={{
+                                                            padding: "8px",
+                                                        }}>
+                                                        <td>{data.nis}</td>
+                                                        <td>{data.name}</td>
+                                                        <td>{data.status}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
