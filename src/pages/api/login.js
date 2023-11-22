@@ -22,30 +22,34 @@ export default async function handler(req, res) {
         }
 
         if (nis.length !== 5) {
-            return res.status(400).json({
-                error: true,
-                message: "NIS harus 5 karakter",
-            });
+            return res
+                .status(400)
+                .json({ error: true, message: "NIS harus 5 karakter" });
         }
 
         if (password.length < 6 || password.length >= 10) {
-            return res.status(400).json({
-                error: true,
-                message: "Password harus antara 6 dan 10 karakter",
-            });
+            return res
+                .status(400)
+                .json({
+                    error: true,
+                    message: "Password harus antara 6 dan 10 karakter",
+                });
         }
 
         const user = await Users.findOne({ nis, password });
 
         if (!user || !user.nis) {
-            return res.status(400).json({
-                error: true,
-                message: "User tidak ditemukan",
-            });
+            return res
+                .status(400)
+                .json({ error: true, message: "User tidak ditemukan" });
         }
 
         const token = generateRandomToken(10);
-        setCookie("token", token, { req, res, maxAge: 60 * 60 * 24 * 30 }); // 1 bulan
+        setCookie("token", token, {
+            req,
+            res,
+            maxAge: isKeepLogin ? 60 * 60 * 24 * 30 : undefined,
+        }); // 1 bulan jika isKeepLogin true
 
         await Users.findOneAndUpdate({ nis, password }, { token });
 

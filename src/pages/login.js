@@ -35,6 +35,8 @@ export default function Login() {
             if (res.ok) {
                 if (!isKeepLogin) {
                     sessionStorage.setItem("token", responseData.token);
+                } else {
+                    localStorage.setItem("token", responseData.token);
                 }
 
                 alert("Sukses login");
