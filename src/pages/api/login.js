@@ -28,12 +28,10 @@ export default async function handler(req, res) {
         }
 
         if (password.length < 6 || password.length >= 10) {
-            return res
-                .status(400)
-                .json({
-                    error: true,
-                    message: "Password harus antara 6 dan 10 karakter",
-                });
+            return res.status(400).json({
+                error: true,
+                message: "Password harus antara 6 dan 10 karakter",
+            });
         }
 
         const user = await Users.findOne({ nis, password });
@@ -45,15 +43,20 @@ export default async function handler(req, res) {
         }
 
         const token = generateRandomToken(10);
-        setCookie("token", token, {
-            req,
-            res,
-            maxAge: isKeepLogin ? 60 * 60 * 24 * 30 : undefined,
-        }); // 1 bulan jika isKeepLogin true
+
+        if (isKeepLogin) {
+            setCookie("token", token, {
+                req,
+                res,
+                maxAge: 60 * 60 * 24 * 30, // 1 bulan
+            });
+        } else {
+            setCookie("token", token, { req, res });
+        }
 
         await Users.findOneAndUpdate({ nis, password }, { token });
 
-        res.status(200).json({ token });
+        res.status(200).json({ token, isKeepLogin: !!isKeepLogin });
     } catch (error) {
         console.log("error:", error);
         res.status(500).json({

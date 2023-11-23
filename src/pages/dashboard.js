@@ -19,44 +19,48 @@ export default function Dasbor() {
                     myToken = sessionStorage.getItem("token");
                 }
 
-                if (myToken) {
-                    const data = { token: myToken };
+                // Tambahkan kondisi untuk mengarahkan ke halaman login jika token tidak tersedia
+                if (!myToken) {
+                    router.push("/login");
+                    return;
+                }
 
-                    let myUser;
-                    await postDataApi(
-                        "/api/checkToken",
-                        data,
-                        (successData) => {
-                            let roleName = "";
-                            switch (successData.role) {
-                                case 0:
-                                    roleName = "Santri";
-                                    break;
-                                case 1:
-                                    roleName = "Admin";
-                                    break;
-                            }
-                            myUser = { ...successData, roleName };
-                            setUser(myUser);
+                const data = { token: myToken };
+
+                let myUser;
+                await postDataApi(
+                    "/api/checkToken",
+                    data,
+                    (successData) => {
+                        let roleName = "";
+                        switch (successData.role) {
+                            case 0:
+                                roleName = "Santri";
+                                break;
+                            case 1:
+                                roleName = "Admin";
+                                break;
+                        }
+                        myUser = { ...successData, roleName };
+                        setUser(myUser);
+                    },
+                    (failData) => {
+                        console.log("failData: ", failData);
+                        router.push("/login");
+                    }
+                );
+
+                if (myUser && myUser.role === 1) {
+                    await getDataApi(
+                        "/api/listUsers",
+                        (dataSuccess) => {
+                            console.log("dataSuccess: ", dataSuccess);
+                            setAllUsers(dataSuccess.users);
                         },
-                        (failData) => {
-                            console.log("failData: ", failData);
-                            router.push("/login");
+                        (dataFail) => {
+                            console.log("dataFail: ", dataFail);
                         }
                     );
-
-                    if (myUser && myUser.role === 1) {
-                        await getDataApi(
-                            "/api/listUsers",
-                            (dataSuccess) => {
-                                console.log("dataSuccess: ", dataSuccess);
-                                setAllUsers(dataSuccess.users);
-                            },
-                            (dataFail) => {
-                                console.log("dataFail: ", dataFail);
-                            }
-                        );
-                    }
                 }
             } catch (error) {
                 console.log("error: ", error);
@@ -71,7 +75,7 @@ export default function Dasbor() {
         <div className={styles.container}>
             <div className={styles.sidebar}>
                 <div className={styles.header}>
-                    <h1>Dasboard</h1>
+                    <h1>Dashboard</h1>
                 </div>
                 <div>
                     <ul>
@@ -127,7 +131,7 @@ export default function Dasbor() {
                 </div>
                 {user.role === 1 && (
                     <div className={styles.tableContainer}>
-                        <div>Data User</div>
+                        <div className={styles.title}>Data User</div>
                         <div className={styles.table}>
                             <table>
                                 <thead>
