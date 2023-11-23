@@ -1,11 +1,10 @@
 import styles from "@/styles/Dashboard.module.css";
-import { dmSans } from "@/styles/fonts";
 import { getCookie } from "cookies-next";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getDataApi, postDataApi } from "@/utils/api";
 
-export default function Dasboard() {
+export default function Dasbor() {
     const [user, setUser] = useState({ id: "", name: "" });
     const router = useRouter();
     const [allUsers, setAllUsers] = useState([]);
@@ -69,23 +68,16 @@ export default function Dasboard() {
     }, [router]);
 
     return (
-        <div className={`${styles.container} ${dmSans.className}`}>
+        <div className={styles.container}>
             <div className={styles.sidebar}>
-                <div
-                    style={{
-                        paddingTop: "56px",
-                        paddingBottom: "56px",
-                        paddingLeft: "54px",
-                        paddingRight: "54px",
-                        height: "70vh",
-                    }}>
+                <div className={styles.header}>
                     <h1>Dasboard</h1>
                 </div>
                 <div>
                     <ul>
-                        <li style={{ listStyleType: "none" }}>
+                        <li>
                             <button
-                                style={{ fontWeight: "18px" }}
+                                className={styles.logoutBtn}
                                 onClick={async () => {
                                     let myToken = "";
                                     if (
@@ -127,62 +119,38 @@ export default function Dasboard() {
                     </ul>
                 </div>
             </div>
-            <div
-                style={{
-                    display: "flex",
-                    width: "100%",
-                    flexDirection: "column",
-                }}>
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "end",
-                        width: "100%",
-                        padding: "16px",
-                    }}>
-                    <span style={{ fontWeight: "700", fontSize: "28px" }}>
-                        {user.name}({user.roleName})
+            <div className={styles.mainContent}>
+                <div className={styles.userHeader}>
+                    <span>
+                        {user.name} ({user.roleName})
                     </span>
                 </div>
-                <div style={{ padding: "32px" }}>
-                    {user.role === 1 && (
-                        <>
-                            <div>Data User</div>
-                            <div style={{ width: "100%" }}>
-                                <table
-                                    style={{
-                                        width: "100%",
-                                        backgroundColor: "#fff",
-                                        border: "1px",
-                                    }}>
-                                    <thead>
-                                        <tr>
-                                            <th>NIS</th>
-                                            <th>Name</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {allUsers &&
-                                            allUsers.map((data, index) => {
-                                                return (
-                                                    <tr
-                                                        key={index}
-                                                        style={{
-                                                            padding: "8px",
-                                                        }}>
-                                                        <td>{data.nis}</td>
-                                                        <td>{data.name}</td>
-                                                        <td>{data.status}</td>
-                                                    </tr>
-                                                );
-                                            })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </>
-                    )}
-                </div>
+                {user.role === 1 && (
+                    <div className={styles.tableContainer}>
+                        <div>Data User</div>
+                        <div className={styles.table}>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>NIS</th>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {allUsers &&
+                                        allUsers.map((data, index) => (
+                                            <tr key={index}>
+                                                <td>{data.nis}</td>
+                                                <td>{data.name}</td>
+                                                <td>{data.status}</td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

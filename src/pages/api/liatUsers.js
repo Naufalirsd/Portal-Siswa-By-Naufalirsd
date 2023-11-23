@@ -9,72 +9,59 @@ export default async function handler(req, res) {
         if (req.method !== "GET") {
             return res
                 .status(405)
-                .json({ error: true, message: "mehtod tidak diijinkan" });
+                .json({ error: true, message: "Metode tidak diizinkan" });
         }
 
-        console.log(req.headers);
-
+        // Mendapatkan token dari header
         const token = req.headers.authorization;
-        // validasi kosong atau tidak
 
+        // Validasi token
         if (!token) {
             return res
                 .status(400)
-                .json({ error: true, message: "tidak ada token" });
+                .json({ error: true, message: "Token tidak ditemukan" });
         }
 
-        // cek apakah user ada
+        // Mencari pengguna berdasarkan token
         const user = await Users.findOne({ token });
-        console.log("user: ", user);
 
-        // jika user tidak ditemukan
+        // Jika pengguna tidak ditemukan atau tidak memiliki NIS
         if (!user || !user.nis) {
             deleteCookie("token", { req, res });
-
             return res.status(400).json({
                 error: true,
-                message: "token tidak valid",
+                message: "Token tidak valid",
             });
         }
 
-        // cek apakah sebagai admin
+        // Cek apakah pengguna memiliki peran sebagai admin (role 1)
         if (user.role !== 1) {
-            return res.status(400).json({
+            return res.status(403).json({
                 error: true,
-                message: "Anda tidak memiliki hak akses/authorization",
+                message: "Anda tidak memiliki hak akses",
             });
         }
 
-        //@todo hanya dijalankan seklai
-        await Users.updateMany(
-            { role: { $exists: false } },
-            { $set: { role: 0 } }
-        ); // hanya dijalankan sekali
-        await Users.updateMany(
-            { status: { $exists: false } },
-            { $set: { status: 1 } }
-        ); // hanya dijalankan sekali
-
-        // tampilkan seluruh santri/siswa
-        let users = await Users.find({ role: 0 });
-        console.log("users: ", users);
-
-        // data yg dikirimkan hanya yg tidak sensitif dan hanya yg perlu saja
-        if (users && users.length > 0) {
-            users = users.map((data) => {
-                return { name: data.name, nis: data.nis, status: data.status };
-            });
+        // Tampilkan semua pengguna jika pengguna adalah admin (role 1)
+        let users;
+        if (user.role === 1) {
+            users = await Users.find({}, { _id: 0, password: 0, token: 0 });
         }
 
-        // kasih tahu client (hanya data yg diperbolehkan)
-        return res.status(200).json({
-            users,
-        });
+        // Data yang dikirimkan hanya yang tidak sensitif dan hanya yang perlu saja
+        const sanitizedUsers = users.map((data) => ({
+            name: data.name,
+            nis: data.nis,
+            status: data.status,
+        }));
+
+        // Kasih tahu client (hanya data yang diperbolehkan)
+        return res.status(200).json({ users: sanitizedUsers });
     } catch (error) {
-        console.log("error:", error);
+        console.error("error:", error);
         res.status(500).json({
             error: true,
-            message: "ada masalah harap hubungi developer",
+            message: "Terjadi kesalahan, harap hubungi pengembang",
         });
     }
 }

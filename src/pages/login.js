@@ -1,6 +1,6 @@
 import styles from "@/styles/Login.module.css";
 import { dmSans } from "@/styles/fonts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -11,6 +11,21 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [isKeepLogin, setKeepLogin] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        const handleUnload = () => {
+            // Bersihkan sessionStorage dan localStorage saat tab ditutup
+            sessionStorage.clear();
+            localStorage.clear();
+        };
+
+        window.addEventListener("unload", handleUnload);
+
+        return () => {
+            // Hapus event listener saat komponen unmount
+            window.removeEventListener("unload", handleUnload);
+        };
+    }, []);
 
     const handleLogin = async (e) => {
         try {
@@ -33,10 +48,10 @@ export default function Login() {
             const responseData = await res.json();
 
             if (res.ok) {
-                if (!isKeepLogin) {
-                    sessionStorage.setItem("token", responseData.token);
-                } else {
+                if (isKeepLogin) {
                     localStorage.setItem("token", responseData.token);
+                } else {
+                    sessionStorage.setItem("token", responseData.token);
                 }
 
                 alert("Sukses login");
