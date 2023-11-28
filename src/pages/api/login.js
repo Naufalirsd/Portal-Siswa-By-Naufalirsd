@@ -27,7 +27,7 @@ export default async function handler(req, res) {
                 .json({ error: true, message: "NIS harus 5 karakter" });
         }
 
-        if (password.length < 6 || password.length >= 10) {
+        if (password.length < 6 || password.length > 10) {
             return res.status(400).json({
                 error: true,
                 message: "Password harus antara 6 dan 10 karakter",
